@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fair Share — Product Case Study</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300..900&family=Work+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F3F5EF;
+    --paper-deep:#E9ECE3;
+    --ink:#1C2B22;
+    --ink-soft:#46564C;
+    --blue:#2E6E86;
+    --blue-deep:#1F4E61;
+    --clay:#C2703D;
+    --clay-deep:#9C5A2E;
+    --gold:#B9872A;
+    --hairline:#D2D7C9;
+    --radius:2px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  ::selection{background:var(--gold);color:var(--paper);}
+  a{color:var(--blue-deep);}
+  h1,h2,h3{font-family:'Fraunces', serif; margin:0; font-weight:600; color:var(--ink);}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  .wrap{max-width:760px; margin:0 auto; padding:0 28px;}
+
+  /* ---------- LEDGER RAIL ---------- */
+  .ledger-rail{
+    position:fixed;
+    left:18px; top:50%;
+    transform:translateY(-50%);
+    z-index:20;
+    display:flex; flex-direction:column; gap:14px;
+  }
+  .ledger-rail a{
+    display:flex; align-items:center; gap:8px;
+    text-decoration:none;
+    color:var(--ink-soft);
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11px;
+    letter-spacing:.04em;
+    opacity:.45;
+    transition:opacity .25s;
+  }
+  .ledger-rail a .dot{width:6px; height:6px; border-radius:50%; background:var(--ink-soft); flex:none; transition:background .25s, transform .25s;}
+  .ledger-rail a.active{opacity:1;}
+  .ledger-rail a.active .dot{background:var(--gold); transform:scale(1.5);}
+  .ledger-rail .label{display:none;}
+  @media (min-width:1180px){ .ledger-rail .label{display:inline;} }
+  @media (max-width:900px){ .ledger-rail{display:none;} }
+
+  /* ---------- HERO ---------- */
+  .hero{
+    padding:100px 28px 70px;
+    max-width:800px; margin:0 auto;
+    text-align:left;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--clay-deep);
+    margin-bottom:18px;
+    display:block;
+  }
+  .hero h1{font-size:clamp(48px,9vw,84px); line-height:.95; letter-spacing:-.01em;}
+  .hero .tagline{
+    font-size:clamp(18px,2.4vw,22px);
+    color:var(--ink-soft);
+    max-width:520px;
+    margin:22px 0 36px;
+    font-weight:400;
+  }
+  .byline{
+    display:flex; gap:22px; flex-wrap:wrap;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    border-top:1px solid var(--hairline);
+    border-bottom:1px solid var(--hairline);
+    padding:14px 0;
+    margin-bottom:48px;
+  }
+  .byline strong{color:var(--ink); font-weight:500;}
+
+  /* ---------- SCALE ---------- */
+  .scale-wrap{
+    display:flex; justify-content:center;
+    margin:10px 0 50px;
+  }
+  .scale-svg{width:100%; max-width:420px; height:auto;}
+  .beam-group{
+    transform-origin:210px 92px;
+    animation:tip 2.6s cubic-bezier(.4,0,.2,1) 1 both;
+  }
+  @keyframes tip{
+    0%{transform:rotate(-11deg);}
+    45%{transform:rotate(8deg);}
+    75%{transform:rotate(-2deg);}
+    100%{transform:rotate(0deg);}
+  }
+  @media (prefers-reduced-motion: reduce){
+    .beam-group{animation:none;}
+  }
+  .scale-label{font-family:'IBM Plex Mono', monospace; font-size:13px; letter-spacing:.08em;}
+
+  .cta-row{display:flex; gap:14px; flex-wrap:wrap;}
+  .btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    letter-spacing:.03em;
+    padding:13px 22px;
+    border-radius:var(--radius);
+    text-decoration:none;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:transform .15s, box-shadow .15s;
+    border:1px solid var(--ink);
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-fill{background:var(--ink); color:var(--paper);}
+  .btn-fill:hover{box-shadow:4px 4px 0 var(--gold);}
+  .btn-outline{background:transparent; color:var(--ink);}
+  .btn-outline:hover{box-shadow:4px 4px 0 var(--hairline);}
+
+  /* ---------- ENTRY SECTIONS ---------- */
+  .entry{
+    padding:90px 0 10px;
+    border-top:1px solid var(--hairline);
+    opacity:0; transform:translateY(18px);
+    transition:opacity .7s ease, transform .7s ease;
+  }
+  .entry.is-visible{opacity:1; transform:translateY(0);}
+  .entry .eyebrow{margin-bottom:10px;}
+  .entry h2{font-size:clamp(28px,4vw,38px); margin-bottom:22px;}
+  .entry p{color:var(--ink-soft); max-width:640px;}
+  .entry p + p{margin-top:14px;}
+
+  /* stat callouts */
+  .stat-row{display:flex; gap:36px; margin:34px 0; flex-wrap:wrap;}
+  .stat{flex:1; min-width:140px;}
+  .stat .num{font-family:'Fraunces', serif; font-size:52px; font-weight:600; color:var(--clay-deep); line-height:1;}
+  .stat .num.blue{color:var(--blue-deep);}
+  .stat .cap{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); margin-top:6px; max-width:180px;}
+
+  /* personas */
+  .tabs{display:flex; gap:10px; margin-bottom:22px;}
+  .tab-btn{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:13px;
+    padding:9px 16px;
+    border:1px solid var(--hairline);
+    background:var(--paper-deep);
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-radius:var(--radius);
+  }
+  .tab-btn.active{background:var(--ink); color:var(--paper); border-color:var(--ink);}
+  .tab-panel{display:none;}
+  .tab-panel.active{display:block;}
+  .persona-card{
+    background:var(--paper-deep);
+    border:1px solid var(--hairline);
+    padding:26px 28px;
+    border-radius:var(--radius);
+  }
+  .persona-card h3{font-size:21px; margin-bottom:8px;}
+  .persona-card .role{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--clay-deep); margin-bottom:14px; display:block;}
+
+  /* table */
+  .table-scroll{overflow-x:auto; margin:28px 0;}
+  table{width:100%; border-collapse:collapse; min-width:520px;}
+  th,td{text-align:left; padding:11px 14px; border-bottom:1px solid var(--hairline); font-size:14.5px;}
+  th{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:11.5px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    cursor:pointer;
+    user-select:none;
+    white-space:nowrap;
+  }
+  th.sortable:hover{color:var(--ink);}
+  th .arrow{font-size:10px; margin-left:4px; opacity:.5;}
+  td.num{font-family:'IBM Plex Mono', monospace;}
+  tr:hover td{background:rgba(0,0,0,.02);}
+
+  .comp-table td:first-child, .comp-table th:first-child{color:var(--blue-deep); font-weight:500;}
+
+  /* accordion */
+  .accordion-item{border-bottom:1px solid var(--hairline);}
+  .accordion-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:18px 0; cursor:pointer;
+  }
+  .accordion-head h4{font-family:'Work Sans', sans-serif; font-weight:600; font-size:16px; margin:0;}
+  .accordion-head .plus{font-family:'IBM Plex Mono', monospace; font-size:18px; color:var(--clay-deep); transition:transform .2s;}
+  .accordion-item.open .plus{transform:rotate(45deg);}
+  .accordion-body{
+    max-height:0; overflow:hidden; transition:max-height .3s ease;
+    color:var(--ink-soft); font-size:15px;
+  }
+  .accordion-body p{padding-bottom:18px;}
+
+  /* story cards */
+  .story-grid{display:grid; grid-template-columns:1fr; gap:16px; margin-top:24px;}
+  .story-card{
+    border:1px solid var(--hairline);
+    background:var(--paper-deep);
+    padding:20px 22px;
+    border-radius:var(--radius);
+  }
+  .story-card .as{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--blue-deep); letter-spacing:.05em;}
+  .story-card p{margin:8px 0 10px; color:var(--ink); font-size:15.5px;}
+  .story-card .ac{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); border-top:1px dashed var(--hairline); padding-top:10px;}
+
+  /* gallery */
+  .gallery{display:flex; gap:18px; overflow-x:auto; padding:8px 0 18px; scroll-snap-type:x mandatory;}
+  .gallery figure{flex:none; width:220px; margin:0; scroll-snap-align:start; cursor:zoom-in;}
+  .gallery img{width:100%; border:1px solid var(--hairline); border-radius:6px; display:block;}
+  .gallery figcaption{font-family:'IBM Plex Mono', monospace; font-size:12px; color:var(--ink-soft); margin-top:8px;}
+
+  .lightbox{
+    position:fixed; inset:0; background:rgba(28,43,34,.92);
+    display:none; align-items:center; justify-content:center;
+    z-index:50; cursor:zoom-out; padding:40px;
+  }
+  .lightbox.open{display:flex;}
+  .lightbox img{max-height:88vh; border-radius:8px;}
+
+  /* QA toggle */
+  .qa-box{
+    border:1px solid var(--hairline);
+    background:var(--paper-deep);
+    border-radius:var(--radius);
+    padding:26px 28px;
+    margin-top:26px;
+  }
+  .qa-toggle{display:flex; gap:8px; margin-bottom:20px;}
+  .qa-toggle button{
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    padding:8px 14px;
+    border:1px solid var(--hairline);
+    background:transparent;
+    color:var(--ink-soft);
+    cursor:pointer;
+    border-radius:var(--radius);
+  }
+  .qa-toggle button.active{background:var(--clay); color:#fff; border-color:var(--clay);}
+  .qa-toggle button.active.fixed{background:var(--blue); border-color:var(--blue);}
+  .score-display{display:flex; align-items:center; gap:24px; flex-wrap:wrap;}
+  .score-pair{display:flex; gap:30px;}
+  .score-pair .who{font-family:'Fraunces', serif; font-size:40px; font-weight:600;}
+  .score-pair .who span{font-family:'IBM Plex Mono', monospace; font-size:13px; display:block; color:var(--ink-soft); font-weight:400;}
+  .score-sum{font-family:'IBM Plex Mono', monospace; font-size:14px; padding:10px 16px; border-radius:var(--radius); border:1px dashed var(--hairline);}
+  .score-sum.bad{color:var(--clay-deep); border-color:var(--clay);}
+  .score-sum.good{color:var(--blue-deep); border-color:var(--blue);}
+
+  /* metrics */
+  .metric-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:16px; margin-top:24px;}
+  .metric-card{border:1px solid var(--hairline); padding:20px; border-radius:var(--radius);}
+  .metric-card .tag{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--gold); letter-spacing:.05em;}
+  .metric-card h4{font-family:'Work Sans',sans-serif; font-size:16px; font-weight:600; margin:8px 0 6px;}
+  .metric-card p{font-size:14px; margin:0; color:var(--ink-soft);}
+  @media (max-width:560px){.metric-grid{grid-template-columns:1fr;}}
+
+  /* reflection */
+  .reflection{
+    padding:90px 0;
+    border-top:1px solid var(--hairline);
+  }
+  .reflection blockquote{
+    font-family:'Fraunces', serif;
+    font-size:clamp(24px,3.6vw,32px);
+    font-weight:500;
+    line-height:1.35;
+    margin:0;
+    color:var(--ink);
+  }
+  .reflection blockquote::before{content:'"'; color:var(--gold);}
+  .reflection blockquote::after{content:'"'; color:var(--gold);}
+
+  footer{
+    padding:50px 0 80px;
+    font-family:'IBM Plex Mono', monospace;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  ul.plain{padding-left:0; list-style:none; margin:18px 0;}
+  ul.plain li{padding-left:20px; position:relative; margin-bottom:10px; color:var(--ink-soft);}
+  ul.plain li::before{content:'—'; position:absolute; left:0; color:var(--gold);}
+</style>
+</head>
+<body>
+
+<nav class="ledger-rail" id="rail">
+  <a href="#entry-01" data-target="entry-01"><span class="dot"></span><span class="label">Problem</span></a>
+  <a href="#entry-02" data-target="entry-02"><span class="dot"></span><span class="label">Users</span></a>
+  <a href="#entry-03" data-target="entry-03"><span class="dot"></span><span class="label">Competitors</span></a>
+  <a href="#entry-04" data-target="entry-04"><span class="dot"></span><span class="label">Prioritization</span></a>
+  <a href="#entry-05" data-target="entry-05"><span class="dot"></span><span class="label">User Stories</span></a>
+  <a href="#entry-06" data-target="entry-06"><span class="dot"></span><span class="label">Prototype</span></a>
+  <a href="#entry-07" data-target="entry-07"><span class="dot"></span><span class="label">QA</span></a>
+  <a href="#entry-08" data-target="entry-08"><span class="dot"></span><span class="label">Metrics</span></a>
+  <a href="#entry-09" data-target="entry-09"><span class="dot"></span><span class="label">Next</span></a>
+</nav>
+
+<header class="hero">
+  <span class="eyebrow">Product case study · Product Owner portfolio</span>
+  <h1>Fair&nbsp;Share</h1>
+  <p class="tagline">Money apps split the bill. None of them split the work — so I built one that tracks both, in one fairness score.</p>
+
+  <div class="scale-wrap">
+    <svg class="scale-svg" viewBox="0 0 420 220">
+      <line x1="210" y1="92" x2="210" y2="200" stroke="#1C2B22" stroke-width="4"/>
+      <polygon points="180,200 240,200 210,165" fill="#1C2B22"/>
+      <g class="beam-group">
+        <line x1="60" y1="92" x2="360" y2="92" stroke="#1C2B22" stroke-width="4"/>
+        <circle cx="210" cy="92" r="7" fill="#B9872A"/>
+        <line x1="60" y1="92" x2="60" y2="135" stroke="#2E6E86" stroke-width="2.5"/>
+        <line x1="360" y1="92" x2="360" y2="135" stroke="#C2703D" stroke-width="2.5"/>
+        <path d="M30,135 a30,30 0 0 0 60,0 Z" fill="#2E6E86"/>
+        <path d="M330,135 a30,30 0 0 0 60,0 Z" fill="#C2703D"/>
+      </g>
+    </svg>
+  </div>
+  <div style="display:flex; justify-content:space-between; max-width:420px; margin:-30px auto 40px;">
+    <span class="scale-label mono" style="color:var(--blue-deep);">MONEY</span>
+    <span class="scale-label mono" style="color:var(--clay-deep);">LABOR</span>
+  </div>
+
+  <div class="byline">
+    <span><strong>Role:</strong> Product Owner (solo)</span>
+    <span><strong>Built with:</strong> Figma Make</span>
+    <span><strong>Scope:</strong> Problem → research → prioritization → prototype</span>
+  </div>
+
+  <div class="cta-row">
+    <a class="btn btn-fill" href="https://fair-share-52351475.figma.site/" target="_blank" rel="noopener">View live prototype ↗</a>
+    <a class="btn btn-outline" href="#entry-01">Read the case study ↓</a>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <section class="entry" id="entry-01">
+    <span class="eyebrow mono">Entry 01</span>
+    <h2>The problem</h2>
+    <p>Expense-splitting apps keep money fair in shared households. Nothing mainstream keeps <em>labor</em> fair — even though the imbalance is real, common, and well documented, not just a hunch.</p>
+    <div class="stat-row">
+      <div class="stat"><span class="num">63%</span><span class="cap">of women report doing more than their fair share of household labor</span></div>
+      <div class="stat"><span class="num blue">22%</span><span class="cap">of men report the same — despite most people believing chores should be split evenly</span></div>
+    </div>
+    <p>That imbalance is linked to stress, burnout, and strain on relationships and careers — and it shows up in any shared living situation, not just families. Meanwhile, the market leader in this space (Splitwise) has explicitly chosen to stay money-only.</p>
+    <p style="font-weight:600; color:var(--ink); margin-top:24px;">Problem statement: shared-living partners have no single, trustworthy way to see if money and labor are actually being split fairly — so the imbalance stays invisible until it becomes resentment.</p>
+  </section>
+
+  <section class="entry" id="entry-02">
+    <span class="eyebrow mono">Entry 02</span>
+    <h2>Who this is for</h2>
+    <p>Two personas, both already managing shared expenses, neither with a way to track the other half of fairness.</p>
+    <div class="tabs">
+      <button class="tab-btn active" data-tab="nadia">Negotiating Nadia</button>
+      <button class="tab-btn" data-tab="sam">Roommate Sam</button>
+    </div>
+    <div class="tab-panel active" id="tab-nadia">
+      <div class="persona-card">
+        <span class="role">Cohabiting partner · works full-time</span>
+        <h3>Wants visibility, not nagging</h3>
+        <p style="color:var(--ink); margin:0;">Feels she's doing more of the invisible "remembering what needs doing" work, not just the visible tasks. A chore chart that feels like punishment would backfire — she wants the imbalance to be obvious without her having to point it out herself.</p>
+      </div>
+    </div>
+    <div class="tab-panel" id="tab-sam">
+      <div class="persona-card">
+        <span class="role">Shares a 2–3 person apartment</span>
+        <h3>Already splits money, not labor</h3>
+        <p style="color:var(--ink); margin:0;">Uses Splitwise for rent and groceries already. Chore disputes happen in the group chat and get forgotten by the next morning. Wants something lightweight — not a system that feels like it's grading him.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="entry" id="entry-03">
+    <span class="eyebrow mono">Entry 03</span>
+    <h2>The competitive landscape</h2>
+    <p>Splitwise isn't a competitor to out-build at its own game. It's a category to extend.</p>
+    <div class="table-scroll">
+      <table class="comp-table">
+        <tr><th>Splitwise does well</th><th>Where the gap is</th></tr>
+        <tr><td>Flexible expense splitting</td><td>Zero chore or labor tracking</td></tr>
+        <tr><td>Fast, clean settle-up flow</td><td>No combined "fairness" view</td></tr>
+        <tr><td>Large, loyal user base</td><td>Recently tightened free tier, frustrating long-time users</td></tr>
+        <tr><td>Deliberately avoids approval features</td><td>No way to surface unequal <em>effort</em>, only unequal $</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <section class="entry" id="entry-04">
+    <span class="eyebrow mono">Entry 04</span>
+    <h2>Prioritization</h2>
+    <p>Scored the feature backlog with RICE (Reach × Impact × Confidence ÷ Effort). Click a column to sort.</p>
+    <div class="table-scroll">
+      <table id="rice-table">
+        <thead>
+          <tr>
+            <th class="sortable" data-key="name">Feature</th>
+            <th class="sortable" data-key="reach">Reach<span class="arrow">↕</span></th>
+            <th class="sortable" data-key="impact">Impact<span class="arrow">↕</span></th>
+            <th class="sortable" data-key="conf">Conf.<span class="arrow">↕</span></th>
+            <th class="sortable" data-key="effort">Effort<span class="arrow">↕</span></th>
+            <th class="sortable" data-key="score">RICE<span class="arrow">↕</span></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:30px;"><strong style="color:var(--ink);">The interesting tension:</strong> the combined fairness score — the entire reason this product exists rather than being "Splitwise with a chore list" — scores <em>below</em> basic expense tracking, because its logic is genuinely harder to validate. A purely mechanical read of RICE would ship a slightly-better Splitwise clone. I overrode the ranking and kept a simplified fairness score in the MVP anyway, because it's the value proposition, not just another feature.</p>
+
+    <h3 style="font-size:18px; margin-top:36px; margin-bottom:6px;">What I cut, and why</h3>
+    <div id="accordion">
+      <div class="accordion-item">
+        <div class="accordion-head"><h4>Manual chore weighting</h4><span class="plus">+</span></div>
+        <div class="accordion-body"><p>Adds setup friction before users see any value. Flat weighting ships in v1; revisit once there's usage data on whether granular control is actually wanted.</p></div>
+      </div>
+      <div class="accordion-item">
+        <div class="accordion-head"><h4>Reminder / nudge notifications</h4><span class="plus">+</span></div>
+        <div class="accordion-body"><p>High value, but a retention lever — not a proof-of-concept lever. Belongs in a v2 focused on keeping active users engaged, not validating the core loop.</p></div>
+      </div>
+      <div class="accordion-item">
+        <div class="accordion-head"><h4>"Swap a chore" negotiation</h4><span class="plus">+</span></div>
+        <div class="accordion-body"><p>Interesting, but speculative. Not worth building until the core fairness loop is validated with real users.</p></div>
+      </div>
+      <div class="accordion-item">
+        <div class="accordion-head"><h4>Photo proof of completion</h4><span class="plus">+</span></div>
+        <div class="accordion-body"><p>Lowest RICE score by a wide margin, and adds trust/privacy complexity disproportionate to its benefit.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="entry" id="entry-05">
+    <span class="eyebrow mono">Entry 05</span>
+    <h2>User stories — MVP scope</h2>
+    <div class="story-grid">
+      <div class="story-card">
+        <span class="as">AS A HOUSEHOLD MEMBER</span>
+        <p>I want to log a shared expense and split it by amount or percentage, so money owed is always clear.</p>
+        <div class="ac">AC: add expense → choose split method → balances update instantly.</div>
+      </div>
+      <div class="story-card">
+        <span class="as">AS A HOUSEHOLD MEMBER</span>
+        <p>I want to add and assign a recurring chore, so responsibilities are visible instead of assumed.</p>
+        <div class="ac">AC: create chore → set frequency → assign owner → mark complete.</div>
+      </div>
+      <div class="story-card">
+        <span class="as">AS A HOUSEHOLD MEMBER</span>
+        <p>I want to see one fairness view combining money and chores, so I can tell at a glance if the load is balanced.</p>
+        <div class="ac">AC: dashboard shows combined score, updates with new data.</div>
+      </div>
+      <div class="story-card">
+        <span class="as">AS A HOUSEHOLD MEMBER</span>
+        <p>I want to settle a money balance in one tap, so I don't have to do manual math.</p>
+        <div class="ac">AC: select "Settle Up" → see amount owed → confirm.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="entry" id="entry-06">
+    <span class="eyebrow mono">Entry 06</span>
+    <h2>The prototype</h2>
+    <p>Five core screens, built and wired into a clickable flow. Click any screen to enlarge.</p>
+    <div class="gallery" id="gallery">
+      <figure data-full="screens/dashboard.png"><img src="screens/dashboard.png" alt="Dashboard screen showing combined fairness score"><figcaption>Dashboard</figcaption></figure>
+      <figure data-full="screens/expenses.png"><img src="screens/expenses.png" alt="Expenses list screen"><figcaption>Expenses</figcaption></figure>
+      <figure data-full="screens/chores.png"><img src="screens/chores.png" alt="Chores list screen"><figcaption>Chores</figcaption></figure>
+      <figure data-full="screens/settleup.png"><img src="screens/settleup.png" alt="Settle Up screen"><figcaption>Settle Up</figcaption></figure>
+      <figure data-full="screens/fairness.png"><img src="screens/fairness.png" alt="Fairness breakdown screen"><figcaption>Fairness Breakdown</figcaption></figure>
+    </div>
+    <a class="btn btn-outline" href="https://fair-share-52351475.figma.site/" target="_blank" rel="noopener">Open the live prototype ↗</a>
+  </section>
+
+  <section class="entry" id="entry-07">
+    <span class="eyebrow mono">Entry 07</span>
+    <h2>QA: what I caught</h2>
+    <p>Catching my own product's flaws felt like part of acting as PO here, not a separate design-review step. In a <em>fairness</em> app specifically, a math error undermines the entire premise.</p>
+    <div class="qa-box">
+      <div class="qa-toggle">
+        <button class="active" data-state="buggy">Buggy version</button>
+        <button data-state="fixed">Fixed version</button>
+      </div>
+      <div class="score-display">
+        <div class="score-pair">
+          <div class="who" style="color:var(--blue-deep);">56<span>Alex</span></div>
+          <div class="who" id="sam-score" style="color:var(--clay-deep);">45<span>Sam</span></div>
+        </div>
+        <div class="score-sum bad" id="sum-display">56 + 45 = 101 — doesn't add up</div>
+      </div>
+      <p style="font-size:13.5px; margin-top:18px; margin-bottom:0;">Each side was rounded independently. The fix: calculate one score directly, then derive the other as <span class="mono">100 − score</span>, instead of rounding both separately.</p>
+    </div>
+  </section>
+
+  <section class="entry" id="entry-08">
+    <span class="eyebrow mono">Entry 08</span>
+    <h2>How I'd measure success</h2>
+    <div class="metric-grid">
+      <div class="metric-card"><span class="tag">ACTIVATION</span><h4>Dual logging in week 1</h4><p>% of new households that log ≥1 expense <em>and</em> ≥1 chore in the first 7 days — proves both halves of the value prop get used.</p></div>
+      <div class="metric-card"><span class="tag">RETENTION</span><h4>Week 4 vs week 1</h4><p>Weekly active households, to see if the habit sticks past novelty.</p></div>
+      <div class="metric-card"><span class="tag">CORE VALUE</span><h4>Fairness Breakdown views</h4><p>% of users viewing it more than once a week — signals the differentiator is actually being used, not just expense tracking.</p></div>
+      <div class="metric-card"><span class="tag">TRUST</span><h4>"Did this feel accurate?"</h4><p>Post-onboarding survey question — trust in the scoring logic is the product's biggest risk.</p></div>
+    </div>
+  </section>
+
+  <section class="entry" id="entry-09">
+    <span class="eyebrow mono">Entry 09</span>
+    <h2>What's next</h2>
+    <ul class="plain">
+      <li>Manual chore weighting — once data shows flat weighting actually frustrates users</li>
+      <li>Notification and reminder system, for retention</li>
+      <li>"Swap a chore" negotiation flow, once the core loop is validated</li>
+    </ul>
+  </section>
+
+  <section class="reflection">
+    <blockquote>The most useful part of this project wasn't the screens — it was the moments where the framework and the judgment disagreed, and learning to explicitly justify overriding the data when strategy calls for it.</blockquote>
+  </section>
+
+  <footer>
+    <span>Fair Share — Product Owner case study</span>
+    <span>Deep Kaur</span>
+  </footer>
+
+</div>
+
+<div class="lightbox" id="lightbox"><img id="lightbox-img" src="" alt=""></div>
+
+<script>
+  // scroll reveal
+  const entries = document.querySelectorAll('.entry');
+  const railLinks = document.querySelectorAll('.ledger-rail a');
+  const io = new IntersectionObserver((items)=>{
+    items.forEach(item=>{
+      if(item.isIntersecting){
+        item.target.classList.add('is-visible');
+        railLinks.forEach(l=>l.classList.toggle('active', l.dataset.target === item.target.id));
+      }
+    });
+  }, {threshold:0.25});
+  entries.forEach(e=>io.observe(e));
+
+  // persona tabs
+  document.querySelectorAll('.tab-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-'+btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // accordion
+  document.querySelectorAll('.accordion-head').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const item = head.parentElement;
+      const body = item.querySelector('.accordion-body');
+      const isOpen = item.classList.contains('open');
+      item.classList.toggle('open', !isOpen);
+      body.style.maxHeight = isOpen ? '0px' : body.scrollHeight + 'px';
+    });
+  });
+
+  // RICE table
+  const riceData = [
+    {name:'Chore list + assignment', reach:10, impact:3, conf:0.8, effort:3},
+    {name:'Shared expense tracking', reach:10, impact:2, conf:1.0, effort:3},
+    {name:'Settle-up flow', reach:8, impact:1, conf:1.0, effort:2},
+    {name:'Reminder / nudge notifications', reach:7, impact:1, conf:0.8, effort:2},
+    {name:'Combined fairness score', reach:9, impact:3, conf:0.5, effort:5},
+    {name:'Weekly fairness digest', reach:6, impact:1, conf:0.8, effort:2},
+    {name:'Manual chore weighting', reach:6, impact:1, conf:0.5, effort:3},
+    {name:'"Swap a chore" negotiation', reach:4, impact:0.5, conf:0.5, effort:3},
+    {name:'Photo proof of completion', reach:3, impact:0.5, conf:0.5, effort:4},
+  ].map(d=>({...d, score: +( (d.reach*d.impact*d.conf)/d.effort ).toFixed(1)}));
+
+  const tbody = document.querySelector('#rice-table tbody');
+  let sortKey='score', sortDir=-1;
+
+  function renderRice(){
+    const rows = [...riceData].sort((a,b)=>{
+      if(sortKey==='name') return a.name.localeCompare(b.name) * sortDir * -1;
+      return (a[sortKey]-b[sortKey]) * sortDir;
+    });
+    tbody.innerHTML = rows.map(r=>`
+      <tr>
+        <td>${r.name}</td>
+        <td class="num">${r.reach}</td>
+        <td class="num">${r.impact}</td>
+        <td class="num">${r.conf}</td>
+        <td class="num">${r.effort}</td>
+        <td class="num" style="color:var(--gold); font-weight:600;">${r.score}</td>
+      </tr>`).join('');
+  }
+  renderRice();
+
+  document.querySelectorAll('#rice-table th.sortable').forEach(th=>{
+    th.addEventListener('click', ()=>{
+      const key = th.dataset.key;
+      sortDir = (sortKey===key) ? sortDir*-1 : -1;
+      sortKey = key;
+      renderRice();
+    });
+  });
+
+  // QA toggle
+  const qaButtons = document.querySelectorAll('.qa-toggle button');
+  const samScore = document.getElementById('sam-score');
+  const sumDisplay = document.getElementById('sum-display');
+  qaButtons.forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      qaButtons.forEach(b=>b.classList.remove('active','fixed'));
+      btn.classList.add('active');
+      if(btn.dataset.state==='fixed'){
+        btn.classList.add('fixed');
+        samScore.innerHTML = '44<span>Sam</span>';
+        sumDisplay.textContent = '56 + 44 = 100 — balances correctly';
+        sumDisplay.classList.remove('bad'); sumDisplay.classList.add('good');
+      } else {
+        samScore.innerHTML = '45<span>Sam</span>';
+        sumDisplay.textContent = '56 + 45 = 101 — doesn\'t add up';
+        sumDisplay.classList.remove('good'); sumDisplay.classList.add('bad');
+      }
+    });
+  });
+
+  // lightbox
+  const lightbox = document.getElementById('lightbox');
+  const lightboxImg = document.getElementById('lightbox-img');
+  document.querySelectorAll('#gallery figure').forEach(fig=>{
+    fig.addEventListener('click', ()=>{
+      lightboxImg.src = fig.dataset.full;
+      lightbox.classList.add('open');
+    });
+  });
+  lightbox.addEventListener('click', ()=> lightbox.classList.remove('open'));
+</script>
+
+</body>
+</html>
